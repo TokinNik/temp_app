@@ -3,7 +3,7 @@ import 'package:temp_app/bloc/base/bloc_logging.dart';
 import 'package:temp_app/di/dependencies.dart';
 
 abstract class Environment {
-  static const bool _isProd = true;
+  static const bool _isProd = false;
 
   //TODO: Your api endpoint
   static const String baseUrl =

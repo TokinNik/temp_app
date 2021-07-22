@@ -10,6 +10,10 @@ TempLogoutCubit tempLogoutCubit(context) =>
     BlocProvider.of<TempLogoutCubit>(context);
 
 class TempLogoutPage extends BasePage<TempLogoutCubit> {
+  static route() {
+    return MaterialPageRoute(builder: (context) => TempLogoutPage());
+  }
+
   TempLogoutPage({Key key})
       : super(
           key: key,
@@ -18,31 +22,44 @@ class TempLogoutPage extends BasePage<TempLogoutCubit> {
         );
 }
 
-class _TempLogoutPageState extends State<BaseStatefulWidget> {
+class _TempLogoutPageState extends BaseState<TempLogoutState> {
+
+  @override
+  void blocListener(TempLogoutState state) {
+    if (state.isSuccessful != null && state.isSuccessful) {
+      globalBloc(context).add(LogInEvent());
+    }
+  }
+
+  @override
+  void init() {
+    super.initialState(tempLogoutCubit(context).stream);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TempLogoutCubit, TempLogoutState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Temp Logout Page"),
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    tempLogoutCubit(context).logIn();
-                    globalBloc(context).add(LogInEvent());
-                  },
-                  child: Text("LogIn"),
+        builder: (context, state) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Temp Logout Page"),
+        ),
+        body: Center(
+          child: state.isLoading
+              ? CircularProgressIndicator()
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        tempLogoutCubit(context).logIn();
+                      },
+                      child: Text("LogIn"),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 }

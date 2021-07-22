@@ -1,6 +1,28 @@
 part of 'temp_logout_cubit.dart';
 
-class TempLogoutState extends Equatable {
+class BasicState {
+  bool isLoading;
+  bool isSuccessful;
+}
+
+class TempLogoutState implements BasicState {
   @override
-  List<Object> get props => [];
+  bool isSuccessful;
+  @override
+  bool isLoading;
+
+  TempLogoutState({
+    this.isSuccessful,
+    this.isLoading,
+  });
+
+  TempLogoutState copyWith({
+    bool isSuccessful,
+    bool isLoading,
+  }) {
+    return new TempLogoutState(
+      isSuccessful: isSuccessful ?? this.isSuccessful,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
 }

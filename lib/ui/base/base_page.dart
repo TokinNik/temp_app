@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class BasePage<T extends BlocBase> extends StatelessWidget {
   final BlocBase Function(BuildContext) bloc;
@@ -33,4 +34,26 @@ class BaseStatefulWidget extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => state;
+}
+
+abstract class BaseState<STATE> extends State<BaseStatefulWidget> {
+  StreamSubscription<STATE> _streamSubscription;
+
+  void blocListener(STATE state);
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
+
+  void init();
+
+  initialState(Stream<STATE> stream) {
+    super.initState();
+    _streamSubscription = stream.listen(blocListener);
+  }
+
+  @override
+  Widget build(BuildContext context);
 }

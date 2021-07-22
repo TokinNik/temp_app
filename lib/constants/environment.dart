@@ -9,6 +9,7 @@ abstract class Environment {
   static const String baseUrl =
       _isProd ? 'https://test.ru/' : 'https://prod.ru/';
   static const bool isBlocLoggingEnabled = !_isProd;
+  static const bool isApiLoggingEnabled = !_isProd;
 
   static Future<void> init() async {
     initDependencies();

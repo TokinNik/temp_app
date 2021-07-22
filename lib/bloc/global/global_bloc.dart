@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:temp_app/constants/text_styles.dart';
 
 part 'global_event.dart';
 

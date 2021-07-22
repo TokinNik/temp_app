@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:temp_app/app.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
 import 'package:temp_app/bloc/temp_logout/temp_logout_cubit.dart';
+import 'package:temp_app/di/dependencies.dart';
 import 'package:temp_app/ui/base/base_page.dart';
+import 'package:temp_app/utils/logger.dart';
 
 TempLogoutCubit tempLogoutCubit(context) =>
     BlocProvider.of<TempLogoutCubit>(context);
@@ -17,7 +19,7 @@ class TempLogoutPage extends BasePage<TempLogoutCubit> {
   TempLogoutPage({Key key})
       : super(
           key: key,
-          bloc: (context) => TempLogoutCubit(),
+          bloc: (context) => TempLogoutCubit(getIt.get()),
           state: _TempLogoutPageState(),
         );
 }
@@ -26,6 +28,7 @@ class _TempLogoutPageState extends BaseState<TempLogoutState> {
 
   @override
   void blocListener(TempLogoutState state) {
+    logD(state);
     if (state.isSuccessful != null && state.isSuccessful) {
       globalBloc(context).add(LogInEvent());
     }

@@ -49,8 +49,13 @@ abstract class BaseState<STATE> extends State<BaseStatefulWidget> {
 
   void init();
 
-  initialState(Stream<STATE> stream) {
+  @override
+  initState() {
     super.initState();
+    init();
+  }
+
+  initialState(Stream<STATE> stream) {
     _streamSubscription = stream.listen(blocListener);
   }
 

@@ -12,8 +12,8 @@ class TempLogoutState implements BasicState {
   bool isLoading;
 
   TempLogoutState({
-    this.isSuccessful,
-    this.isLoading,
+    this.isSuccessful = false,
+    this.isLoading = false,
   });
 
   TempLogoutState copyWith({
@@ -24,5 +24,10 @@ class TempLogoutState implements BasicState {
       isSuccessful: isSuccessful ?? this.isSuccessful,
       isLoading: isLoading ?? this.isLoading,
     );
+  }
+
+  @override
+  String toString() {
+    return 'TempLogoutState{isSuccessful: $isSuccessful, isLoading: $isLoading}';
   }
 }

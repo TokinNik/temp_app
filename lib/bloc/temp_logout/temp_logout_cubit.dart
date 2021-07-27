@@ -11,13 +11,19 @@ class TempLogoutCubit extends Cubit<TempLogoutState> {
 
   logIn() async {
     emit(state.copyWith(isLoading: true));
-    var newToken = await sessionService.refreshToken();
-    logD(newToken);
+
+    try {
+      var newToken = await sessionService.refreshToken();
+      logD(newToken);
+    } catch (e) {
+      logD(e.toString());
+      //todo <---- errors
+    }
+
     emit(state.copyWith(
       isLoading: false,
       isSuccessful: true,
     ));
     emit(state.copyWith(isSuccessful: false));
   }
-
 }

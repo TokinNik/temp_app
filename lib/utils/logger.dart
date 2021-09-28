@@ -13,7 +13,7 @@ class LoggerInstance {
       printTime: false,
       printEmojis: false,
     );
-    var preficPronter = PrefixPrinter(
+    var prefixPrinter = PrefixPrinter(
       SimplePrinter(
         printTime: false,
         colors: false,
@@ -21,7 +21,8 @@ class LoggerInstance {
       verbose: "NETWORK",
     );
     logger = Logger(
-      printer: preficPronter,
+      printer: prefixPrinter,
+      // printer: prettyPrinter,
     );
   }
 }

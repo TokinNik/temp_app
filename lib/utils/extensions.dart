@@ -1,7 +1,9 @@
+import 'package:temp_app/utils/logger.dart';
+
 extension IterableExtension<T> on Iterable<T> {
   printAll() {
     this.forEach((element) {
-      print("$element");
+      logD("$element");
     });
   }
 

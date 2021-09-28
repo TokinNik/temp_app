@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:temp_app/core/dio/errors/dio_errors.dart';
+import 'package:temp_app/utils/logger.dart';
 
 class CheckErrorsInterceptor extends Interceptor {
   @override
@@ -11,24 +13,30 @@ class CheckErrorsInterceptor extends Interceptor {
     super.onError(err, handler);
   }
 
-  Exception _parseError(DioError err) {
+  ApiErrorException _parseError(DioError err) {
     switch (err.type) {
       case DioErrorType.connectTimeout:
+        logD("DioErrorType.connectTimeout: $err");
         // TODO: Handle this case.
         break;
       case DioErrorType.sendTimeout:
+        logD("DioErrorType.sendTimeout: $err");
         // TODO: Handle this case.
         break;
       case DioErrorType.receiveTimeout:
+        logD("DioErrorType.receiveTimeout: $err");
         // TODO: Handle this case.
         break;
       case DioErrorType.response:
+        logD("DioErrorType.response: $err");
         // TODO: Handle this case.
         break;
       case DioErrorType.cancel:
+        logD("DioErrorType.cancel: $err");
         // TODO: Handle this case.
         break;
       case DioErrorType.other:
+        logD("DioErrorType.other: $err");
         // TODO: Handle this case.
         break;
     }

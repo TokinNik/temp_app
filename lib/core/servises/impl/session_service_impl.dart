@@ -42,6 +42,9 @@ class SessionServiceImpl with ErrorUnWrapper implements SessionService {
   Future<Token> refreshToken() => run(() {
         {
           // TODO: implement refreshToken
+
+          //throw DioError(requestOptions: null, error: SessionExpiredException());
+
           return Future.delayed(
             Duration(seconds: 1),
             () => Token(

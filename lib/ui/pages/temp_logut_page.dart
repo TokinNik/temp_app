@@ -25,14 +25,20 @@ class TempLogoutPage extends BasePage<TempLogoutCubit> {
 }
 
 class _TempLogoutPageState extends BaseState<TempLogoutState> {
-
   @override
   void blocListener(TempLogoutState state) {
     logD(state);
+    _errorText = "";
     if (state.isSuccessful != null && state.isSuccessful) {
       globalBloc(context).add(LogInEvent());
+      //TODO: show success
+    } else if (state.error != null) {
+      _errorText = state.error.toString();
+      //TODO: handle errors
     }
   }
+
+  String _errorText = "";
 
   @override
   void init() {
@@ -47,20 +53,22 @@ class _TempLogoutPageState extends BaseState<TempLogoutState> {
         appBar: AppBar(
           title: Text("Temp Logout Page"),
         ),
-        body: Center(
-          child: state.isLoading
-              ? CircularProgressIndicator()
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        tempLogoutCubit(context).logIn();
-                      },
-                      child: Text("LogIn"),
-                    ),
-                  ],
-                ),
+        body: Column(
+          children: [
+            Text(_errorText),
+            Expanded(
+              child: Center(
+                child: state.isLoading
+                    ? CircularProgressIndicator()
+                    : TextButton(
+                        onPressed: () {
+                          tempLogoutCubit(context).logIn();
+                        },
+                        child: Text("LogIn"),
+                      ),
+              ),
+            ),
+          ],
         ),
       );
     });

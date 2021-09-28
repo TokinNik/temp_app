@@ -24,7 +24,8 @@ simpleApiCall<STATE extends BasicState>(
         isSuccessful: showSuccess,
         isLoading: false,
       ));
-      blocBaseOwner.emit((blocBaseOwner.state as STATE).copyWith(isSuccessful: false));
+      blocBaseOwner
+          .emit((blocBaseOwner.state as STATE).copyWith(isSuccessful: false));
     } catch (e) {
       onError?.call();
       blocBaseOwner.emit((blocBaseOwner.state as STATE).copyWith(

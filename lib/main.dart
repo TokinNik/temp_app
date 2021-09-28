@@ -5,7 +5,6 @@ import 'app.dart';
 
 void main() async {
   await Environment.init();
-  
-  
+
   runApp(App());
 }

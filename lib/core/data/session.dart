@@ -27,7 +27,7 @@ class Session {
   //TODO: Change map names if need
   factory Session.fromJson(Map<String, dynamic> json) => Session(
         accessToken: Token.fromMap(json["accessToken"]),
-        refreshToken:  Token.fromMap(json["refreshToken"]),
+        refreshToken: Token.fromMap(json["refreshToken"]),
       );
 
   //TODO: Change map names if need

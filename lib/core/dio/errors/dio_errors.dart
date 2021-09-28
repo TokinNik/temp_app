@@ -1,4 +1,3 @@
-
 abstract class ApiErrorException implements Exception {}
 
 class SessionExpiredException implements ApiErrorException {

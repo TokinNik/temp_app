@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
 import 'package:temp_app/ui/pages/temp_login_page.dart';
-import 'package:temp_app/ui/pages/temp_logut_page.dart';
-import 'package:temp_app/utils/logger.dart';
+import 'package:temp_app/ui/pages/temp_logout_page.dart';
 
 GlobalBloc globalBloc(context) => BlocProvider.of<GlobalBloc>(context);
 
@@ -30,11 +29,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   setState(() {
-    //     //
-    //   });
-    // });
     return BlocProvider<GlobalBloc>(
       create: (BuildContext context) => _globalBloc,
       child: BlocBuilder<GlobalBloc, GlobalState>(

@@ -8,13 +8,12 @@ import 'package:temp_app/ui/pages/temp_next_rout_page.dart';
 class TempLoginPage extends BasePage {
   TempLoginPage({Key key})
       : super(
-    key: key,
-    state: _TempLoginPageState(),
-  );
+          key: key,
+          state: _TempLoginPageState(),
+        );
 }
 
 class _TempLoginPageState extends State<BaseStatefulWidget> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-
 import 'package:temp_app/core/dio/dio.dart';
 import 'package:temp_app/core/dio/errors/dio_errors.dart';
 import 'package:temp_app/core/servises/session_service.dart';
@@ -11,7 +10,8 @@ class CheckTokenInterceptor extends Interceptor {
   CheckTokenInterceptor(this.sessionService, this.requestLock);
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     final session = await sessionService.getSession();
     var authToken = session.accessToken;
 

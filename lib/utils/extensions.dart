@@ -18,5 +18,16 @@ extension IterableExtension<T> on Iterable<T> {
   }
 
   get tryLength => (this?.length ?? 0);
+
+  get tryFirst => ((this?.length ?? 0) > 0 ? this?.first : null);
 }
 
+extension StringExtension on String {
+  String capitalize() =>
+      this.replaceRange(0, 1, this.substring(0, 1).toUpperCase());
+
+  String capitalizeAll() =>
+      this.split(" ").map((e) => e.capitalize()).join(" ");
+
+  bool isNullOrEmpty() => (this == null || this.isEmpty);
+}

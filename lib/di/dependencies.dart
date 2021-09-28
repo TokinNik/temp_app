@@ -18,6 +18,4 @@ void initDependencies() {
     ),
   );
   getIt.registerSingleton<Dio>(DioFactory.buildMainClient(getIt.get()));
-
-
 }

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
 import 'package:temp_app/ui/pages/temp_login_page.dart';
 import 'package:temp_app/ui/pages/temp_logut_page.dart';
+import 'package:temp_app/utils/logger.dart';
 
 GlobalBloc globalBloc(context) => BlocProvider.of<GlobalBloc>(context);
 
@@ -29,26 +30,35 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: BlocProvider(
-        create: (BuildContext context) => _globalBloc,
-        child: BlocBuilder<GlobalBloc, GlobalState>(
-          bloc: _globalBloc,
-          builder: (context, state) {
-            switch (state.appState) {
-              case AppState.LOG_IN:
-                return TempLoginPage();
-                break;
-              case AppState.LOG_OUT:
-                return TempLogoutPage();
-                break;
-            }
-            return Center(
-              child: Text("Unknown app state"),
-            );
-          },
-        ),
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   setState(() {
+    //     //
+    //   });
+    // });
+    return BlocProvider<GlobalBloc>(
+      create: (BuildContext context) => _globalBloc,
+      child: BlocBuilder<GlobalBloc, GlobalState>(
+        bloc: _globalBloc,
+        builder: (context, state) {
+          return MaterialApp(
+            home: _buildPage(state),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildPage(GlobalState state) {
+    switch (state.appState) {
+      case AppState.LOG_IN:
+        return TempLoginPage();
+        break;
+      case AppState.LOG_OUT:
+        return TempLogoutPage();
+        break;
+    }
+    return Center(
+      child: Text("Unknown app state"),
     );
   }
 }

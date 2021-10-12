@@ -57,7 +57,6 @@ class _TempNextRoutPageState extends BaseState<BaseStatefulWidget> {
                 TextButton(
                   onPressed: () {
                     _globalBloc(context).add(LogOutEvent());
-                    // Navigator.of(context).pop();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Text(s.log_out),

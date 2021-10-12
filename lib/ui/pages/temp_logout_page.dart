@@ -5,6 +5,7 @@ import 'package:temp_app/app.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
 import 'package:temp_app/bloc/temp_logout/temp_logout_cubit.dart';
 import 'package:temp_app/di/dependencies.dart';
+import 'package:temp_app/generated/l10n.dart';
 import 'package:temp_app/ui/base/base_page.dart';
 import 'package:temp_app/utils/logger.dart';
 
@@ -42,7 +43,7 @@ class _TempLogoutPageState extends BaseState<TempLogoutState> {
 
   @override
   void init() {
-    super.initialState(tempLogoutCubit(context).stream);
+    super.initialBlocListener(tempLogoutCubit(context).stream);
   }
 
   @override
@@ -64,7 +65,7 @@ class _TempLogoutPageState extends BaseState<TempLogoutState> {
                         onPressed: () {
                           tempLogoutCubit(context).logIn();
                         },
-                        child: Text("LogIn"),
+                        child: Text(S.current.log_in),
                       ),
               ),
             ),

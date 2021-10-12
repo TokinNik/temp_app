@@ -2,9 +2,11 @@ import 'package:temp_app/utils/logger.dart';
 
 extension IterableExtension<T> on Iterable<T> {
   printAll() {
+      logD("--------");
     this.forEach((element) {
       logD("$element");
     });
+      logD("--------");
   }
 
   void forEachIndexed(void Function(T e, int i) f) {
@@ -15,6 +17,13 @@ extension IterableExtension<T> on Iterable<T> {
   Iterable<E> mapIndexed<E>(E Function(T e, int i) f) {
     var i = 0;
     return map((e) => f(e, i++));
+  }
+
+  T firstWhereOrNull(bool Function(T e) f) {
+    return this.firstWhere(
+          (el) => f(el),
+      orElse: () => null,
+    );
   }
 
   get tryLength => (this?.length ?? 0);

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
 import 'package:temp_app/ui/pages/temp_login_page.dart';
 import 'package:temp_app/ui/pages/temp_logout_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/l10n.dart';
 
 GlobalBloc globalBloc(context) => BlocProvider.of<GlobalBloc>(context);
 
@@ -35,6 +37,14 @@ class _AppState extends State<App> {
         bloc: _globalBloc,
         builder: (context, state) {
           return MaterialApp(
+            localizationsDelegates: [
+              S.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
+            locale: Locale('en', ''),//TODO: change locale if need
             home: _buildPage(state),
           );
         },

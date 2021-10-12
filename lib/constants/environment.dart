@@ -7,7 +7,7 @@ abstract class Environment {
 
   //TODO: Your api endpoint
   static const String baseUrl =
-      _isProd ? 'https://test.ru/' : 'https://prod.ru/';
+      _isProd ? 'https://prod.ru/' : 'https://test.ru/';
   static const bool isBlocLoggingEnabled = !_isProd;
   static const bool isApiLoggingEnabled = !_isProd;
 

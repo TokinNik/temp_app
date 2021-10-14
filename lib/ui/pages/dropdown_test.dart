@@ -114,7 +114,7 @@ class _DropdownTestPageState extends BaseState<DropdownTestPage> {
   Widget _buildNewDropdown() {
     return NewDropdownButton<int>(
       isSingleChoice: false,
-      isExpanded: true,
+      // isExpanded: true,
       value: currentValue,
       onChanged: (v) {
         setState(() {

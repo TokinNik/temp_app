@@ -1252,7 +1252,7 @@ class _NewDropdownButtonState<T> extends State<NewDropdownButton<T>>
   }
 
   void _removeDropdownRoute() {
-    _dropdownRoute._dismiss();
+    _dropdownRoute?._dismiss();
     _dropdownRoute = null;
     _lastOrientation = null;
   }

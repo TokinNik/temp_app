@@ -17,13 +17,17 @@ class DraggableTestPage extends BasePage {
 }
 
 class _DraggableTestPageState extends State<BaseStatefulWidget> {
+  static const List<int> CELLS_AROUND = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+  static const double CELL_SIZE = 50;
+  static const double CELL_PADDING = 8;
+  static const int DEFAULT_DRAG_ID = -2;
   List<List<Cell>> total = [];
   var maxX = 5;
   var maxY = 5;
   var counter = 0;
   var isDragStarted = false;
   var isMoveStarted = false;
-  var dragStartedId = -2; //todo in const?
+  var dragStartedId = DEFAULT_DRAG_ID;
 
   bool _setData(
     int x,
@@ -34,7 +38,6 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
       if (value.direction == null || value.direction == Axis.vertical) {
         var anchor = 0;
         if (_checkVertical(x, y, value.data, value.anchor)) {
-          //todo collapse same
           counter++;
           value.direction = Axis.vertical;
           _setDataVertical(x, y, value, value.anchor);
@@ -95,11 +98,9 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   }
 
   _setDataAround(int x, int y) {
-    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1]; //todo in const
-    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
-    listX.forEachIndexed((px, i) {
+    CELLS_AROUND.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + listY[i];
+      var posY = y + CELLS_AROUND[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
       if (isPositionInBounds && total[posX][posY].id < 0) {
@@ -109,11 +110,9 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   }
 
   _removeDataAround(int x, int y) {
-    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
-    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
-    listX.forEachIndexed((px, i) {
+    CELLS_AROUND.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + listY[i];
+      var posY = y + CELLS_AROUND[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
       if (isPositionInBounds) {
@@ -167,12 +166,10 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   }
 
   bool _checkAllEmptyAround(int x, int y, int id) {
-    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
-    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
     var result = true;
-    listX.forEachIndexed((px, i) {
+    CELLS_AROUND.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + listY[i];
+      var posY = y + CELLS_AROUND[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
       if (isPositionInBounds) {
@@ -281,22 +278,22 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
                   Cell(data: 0),
                   isMainBox: true,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
                   Cell(data: 1),
                   isMainBox: true,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
                   Cell(data: 2),
                   isMainBox: true,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
                   Cell(data: 3),
                   isMainBox: true,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
                   Cell(data: 4),
                   isMainBox: true,
@@ -352,8 +349,8 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
             ? SizedBox.shrink()
             : Container(
                 color: Colors.amber,
-                width: 50,
-                height: 50,
+                width: CELL_SIZE,
+                height: CELL_SIZE,
                 child: Center(
                   child: Text(
                     "${data.data}(${data.id})[${data.anchor}]",
@@ -367,15 +364,16 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
           var pos = renderObject.globalToLocal(position);
           return Offset(
             data.direction == Axis.vertical
-                ? pos.dx + 66.0 * data.subId
-                : pos.dx, //todo size + padding
+                ? pos.dx +
+                    (CELL_SIZE + CELL_PADDING + CELL_PADDING) * data.subId
+                : pos.dx,
             data.direction == Axis.horizontal
-                ? pos.dy + 66.0 * data.subId
+                ? pos.dy +
+                    (CELL_SIZE + CELL_PADDING + CELL_PADDING) * data.subId
                 : pos.dy,
           );
         },
         feedback: _buildDraggableFeedback(data),
-        // feedbackOffset:
         onDragStarted: () {
           logD("onDragStarted");
           setState(() {
@@ -398,7 +396,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
           setState(() {
             isDragStarted = false;
             isMoveStarted = false;
-            dragStartedId = -2;
+            dragStartedId = DEFAULT_DRAG_ID;
           });
         },
         onDragCompleted: () {
@@ -406,7 +404,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
           setState(() {
             isDragStarted = false;
             isMoveStarted = false;
-            dragStartedId = -2;
+            dragStartedId = DEFAULT_DRAG_ID;
           });
         },
         onDraggableCanceled: (Velocity velocity, Offset offset) {
@@ -415,7 +413,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
           setState(() {
             isDragStarted = false;
             isMoveStarted = false;
-            dragStartedId = -2;
+            dragStartedId = DEFAULT_DRAG_ID;
           });
         },
         onDragUpdate: (DragUpdateDetails details) {
@@ -430,11 +428,11 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     for (var i = 0; i < data.data; i++) {
       items.add(
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(CELL_PADDING),
           child: Container(
             color: Colors.grey,
-            width: 50,
-            height: 50,
+            width: CELL_SIZE,
+            height: CELL_SIZE,
             child: Material(
               type: MaterialType.transparency,
               child: Center(
@@ -447,7 +445,6 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
         ),
       );
     }
-    logD("|  ${data}");
     var root = (data.direction != null && data.direction == Axis.horizontal)
         ? Column(
             children: items,
@@ -465,7 +462,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
 
   Widget _buildDragTarget(int x, int y) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(CELL_PADDING),
       child: Stack(
         children: [
           DragTarget<Cell>(
@@ -474,8 +471,8 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
               // logD("rejectedData: $rejectedData");
               return Container(
                 color: Colors.green,
-                width: 50,
-                height: 50,
+                width: CELL_SIZE,
+                height: CELL_SIZE,
                 child: Center(
                   child: Text(
                     total[x][y].data.toString(),

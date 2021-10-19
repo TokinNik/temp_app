@@ -17,7 +17,8 @@ class DraggableTestPage extends BasePage {
 }
 
 class _DraggableTestPageState extends State<BaseStatefulWidget> {
-  static const List<int> CELLS_AROUND = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+  static const List<int> CELLS_AROUND_X = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+  static const List<int> CELLS_AROUND_Y = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
   static const double CELL_SIZE = 50;
   static const double CELL_PADDING = 8;
   static const int DEFAULT_DRAG_ID = -2;
@@ -37,14 +38,14 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     setState(() {
       if (value.direction == null || value.direction == Axis.vertical) {
         var anchor = 0;
-        if (_checkVertical(x, y, value.data, value.anchor)) {
+        if (_checkVertical(x, y, value.cellType, value.anchor)) {
           counter++;
           value.direction = Axis.vertical;
           _setDataVertical(x, y, value, value.anchor);
           return true;
         }
         while (anchor <= maxX) {
-          if (_checkVertical(x, y, value.data, anchor)) {
+          if (_checkVertical(x, y, value.cellType, anchor)) {
             counter++;
             value.direction = Axis.vertical;
             value.anchor = anchor;
@@ -57,14 +58,14 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
       }
       if (value.direction == null || value.direction == Axis.horizontal) {
         var anchor = 0;
-        if (_checkHorizontal(x, y, value.data, value.anchor)) {
+        if (_checkHorizontal(x, y, value.cellType, value.anchor)) {
           counter++;
           value.direction = Axis.horizontal;
           _setDataHorizontal(x, y, value, value.anchor);
           return true;
         }
         while (anchor <= maxY) {
-          if (_checkHorizontal(x, y, value.data, anchor)) {
+          if (_checkHorizontal(x, y, value.cellType, anchor)) {
             counter++;
             value.direction = Axis.horizontal;
             value.anchor = anchor;
@@ -79,14 +80,19 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     return false;
   }
 
-  bool _checkVertical(int x, int y, int lenght, int anchor) {
-    return _checkAllEmptyLeft(x, y, anchor + 1) &&
-        _checkAllEmptyRight(x, y, lenght - anchor);
+  bool _checkVertical(
+    int x,
+    int y,
+    CellType cellType,
+    int anchor,
+  ) {
+    return _checkAllEmptyLeft(x, y, anchor + 1, cellType) &&
+        _checkAllEmptyRight(x, y, cellType.getSize() - anchor, cellType);
   }
 
-  bool _checkHorizontal(int x, int y, int lenght, int anchor) {
-    return _checkAllEmptyTop(x, y, anchor + 1) &&
-        _checkAllEmptyBottom(x, y, lenght - anchor);
+  bool _checkHorizontal(int x, int y, CellType cellType, int anchor) {
+    return _checkAllEmptyTop(x, y, anchor + 1, cellType) &&
+        _checkAllEmptyBottom(x, y, cellType.getSize() - anchor, cellType);
   }
 
   _setDataVertical(int x, int y, Cell value, int anchor) {
@@ -98,84 +104,112 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   }
 
   _setDataAround(int x, int y) {
-    CELLS_AROUND.forEachIndexed((px, i) {
+    CELLS_AROUND_X.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + CELLS_AROUND[i];
+      var posY = y + CELLS_AROUND_Y[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
-      if (isPositionInBounds && total[posX][posY].id < 0) {
-        total[posX][posY].data++;
+      if (isPositionInBounds) {
+        total[posX][posY].unitsAround++;
+        logD("qq $posX $posY = ${total[posX][posY].unitsAround}");
       }
     });
   }
 
   _removeDataAround(int x, int y) {
-    CELLS_AROUND.forEachIndexed((px, i) {
+    CELLS_AROUND_X.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + CELLS_AROUND[i];
+      var posY = y + CELLS_AROUND_Y[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
       if (isPositionInBounds) {
-        var isCallAvailable =
-            total[posX][posY].id < 0 && total[posX][posY].data > 0;
-        if (isCallAvailable) {
-          total[posX][posY].data--;
+        if (total[posX][posY].unitsAround > 0) {
+          total[posX][posY].unitsAround--;
+          logD("dd $posX $posY = ${total[posX][posY].unitsAround}");
         }
       }
     });
   }
 
   _setDataRight(int x, int y, Cell value) {
-    for (var i = 0; i < value.data; i++) {
+    for (var i = 0; i < value.cellType.getSize(); i++) {
       var posY = y + i;
       if (posY < maxY) {
+        total[x][posY] = value.copyWith(
+          x: x,
+          y: posY,
+          id: counter,
+          subId: i,
+          unitsAround: total[x][posY].unitsAround,
+        );
         _setDataAround(x, posY);
-        total[x][posY] = value.copyWith(x: x, y: posY, id: counter, subId: i);
       }
     }
   }
 
   _setDataLeft(int x, int y, Cell value) {
-    for (var i = 0; i < value.data; i++) {
+    for (var i = 0; i < value.cellType.getSize(); i++) {
       var posY = y - i;
       if (posY >= 0) {
+        total[x][posY] = value.copyWith(
+          x: x,
+          y: posY,
+          id: counter,
+          subId: i,
+          unitsAround: total[x][posY].unitsAround,
+        );
         _setDataAround(x, posY);
-        total[x][posY] = value.copyWith(x: x, y: posY, id: counter, subId: i);
       }
     }
   }
 
   _setDataTop(int x, int y, Cell value) {
-    for (var i = 0; i < value.data; i++) {
+    for (var i = 0; i < value.cellType.getSize(); i++) {
       var posX = x - i;
       if (posX >= 0) {
+        total[posX][y] = value.copyWith(
+          x: posX,
+          y: y,
+          id: counter,
+          subId: i,
+          unitsAround: total[posX][y].unitsAround,
+        );
         _setDataAround(posX, y);
-        total[posX][y] = value.copyWith(x: posX, y: y, id: counter, subId: i);
       }
     }
   }
 
   _setDataBottom(int x, int y, Cell value) {
-    for (var i = 0; i < value.data; i++) {
+    for (var i = 0; i < value.cellType.getSize(); i++) {
       var posX = x + i;
       if (posX < maxX) {
+        total[posX][y] = value.copyWith(
+          x: posX,
+          y: y,
+          id: counter,
+          subId: i,
+          unitsAround: total[posX][y].unitsAround,
+        );
         _setDataAround(posX, y);
-        total[posX][y] = value.copyWith(x: posX, y: y, id: counter, subId: i);
       }
     }
   }
 
-  bool _checkAllEmptyAround(int x, int y, int id) {
+  bool _checkAllEmptyAround(int x, int y, int id, CellType cellType) {
+    logD("CC $cellType");
+    if (cellType == CellType.FILL_M) {
+      return true;
+    }
     var result = true;
-    CELLS_AROUND.forEachIndexed((px, i) {
+    CELLS_AROUND_X.forEachIndexed((px, i) {
       var posX = x + px;
-      var posY = y + CELLS_AROUND[i];
+      var posY = y + CELLS_AROUND_Y[i];
       var isPositionInBounds =
           posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
       if (isPositionInBounds) {
-        var isClearCell =
-            total[posX][posY].id < 0 || total[posX][posY].id == id;
-        logD("isClearCell $isClearCell $posX $posY  ${total[posX][posY].id}");
+        var isClearCell = total[posX][posY].cellType == CellType.EMPTY ||
+            total[posX][posY].cellType == CellType.FILL_M ||
+            total[posX][posY].id == id;
         if (!isClearCell) {
           result = false;
         }
@@ -184,50 +218,76 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     return result;
   }
 
-  bool _checkAllEmptyRight(int x, int y, int length) {
+  bool _checkAllEmptyRight(int x, int y, int length, CellType cellType) {
     if (y + length > maxY) {
       return false;
     }
     for (var i = y; i < y + length; i++) {
-      if (total[x][i].id >= 0) {
-        return false;
-      } else if (!_checkAllEmptyAround(x, i, total[x][i].id)) {
+      if (total[x][i].cellType != CellType.EMPTY ||
+          !_checkAllEmptyAround(
+            x,
+            i,
+            total[x][i].id,
+            cellType,
+          )) {
+        logD("FALSE");
         return false;
       }
     }
+    logD("TRUE");
     return true;
   }
 
-  bool _checkAllEmptyLeft(int x, int y, int length) {
+  bool _checkAllEmptyLeft(int x, int y, int length, CellType cellType) {
     if (y - length + 1 < 0) {
       return false;
     }
     for (var i = y; i > y - length; i--) {
-      if (total[x][i].id >= 0 || !_checkAllEmptyAround(x, i, total[x][i].id)) {
+      if (total[x][i].cellType != CellType.EMPTY ||
+          !_checkAllEmptyAround(
+            x,
+            i,
+            total[x][i].id,
+            cellType,
+          )) {
+        logD("FALSE");
         return false;
       }
     }
+    logD("TRUE");
     return true;
   }
 
-  bool _checkAllEmptyTop(int x, int y, int length) {
+  bool _checkAllEmptyTop(int x, int y, int length, CellType cellType) {
     if (x - length + 1 < 0) {
       return false;
     }
     for (var i = x; i > x - length; i--) {
-      if (total[i][y].id >= 0 || !_checkAllEmptyAround(i, y, total[i][y].id)) {
+      if (total[x][i].cellType != CellType.EMPTY ||
+          !_checkAllEmptyAround(
+            i,
+            y,
+            total[i][y].id,
+            cellType,
+          )) {
         return false;
       }
     }
     return true;
   }
 
-  bool _checkAllEmptyBottom(int x, int y, int lenght) {
+  bool _checkAllEmptyBottom(int x, int y, int lenght, CellType cellType) {
     if (x + lenght > maxY) {
       return false;
     }
     for (var i = x; i < x + lenght; i++) {
-      if (total[i][y].id >= 0 || !_checkAllEmptyAround(i, y, total[i][y].id)) {
+      if (total[x][i].cellType != CellType.EMPTY ||
+          !_checkAllEmptyAround(
+            i,
+            y,
+            total[i][y].id,
+            cellType,
+          )) {
         return false;
       }
     }
@@ -240,8 +300,8 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
         total.forEach((row) {
           row.forEach((cell) {
             if (cell.id == value.id) {
+              total[cell.x][cell.y] = Cell(unitsAround: cell.unitsAround);
               _removeDataAround(cell.x, cell.y);
-              total[cell.x][cell.y] = Cell();
             }
           });
         });
@@ -275,27 +335,27 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildDraggableBox(
-                  Cell(data: 0),
+                  Cell(cellType: CellType.FILL_1),
                   isMainBox: true,
                 ),
                 SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
-                  Cell(data: 1),
+                  Cell(cellType: CellType.FILL_2),
                   isMainBox: true,
                 ),
                 SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
-                  Cell(data: 2),
+                  Cell(cellType: CellType.FILL_3),
                   isMainBox: true,
                 ),
                 SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
-                  Cell(data: 3),
+                  Cell(cellType: CellType.FILL_4),
                   isMainBox: true,
                 ),
                 SizedBox(width: CELL_PADDING),
                 _buildDraggableBox(
-                  Cell(data: 4),
+                  Cell(cellType: CellType.FILL_M),
                   isMainBox: true,
                 ),
               ],
@@ -353,7 +413,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
                 height: CELL_SIZE,
                 child: Center(
                   child: Text(
-                    "${data.data}(${data.id})[${data.anchor}]",
+                    "${data.cellType.getSize()}(${data.id})[${data.anchor}]",
                   ),
                 ),
               ),
@@ -425,7 +485,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
 
   Widget _buildDraggableFeedback(Cell data) {
     List<Widget> items = [];
-    for (var i = 0; i < data.data; i++) {
+    for (var i = 0; i < data.cellType.getSize(); i++) {
       items.add(
         Padding(
           padding: const EdgeInsets.all(CELL_PADDING),
@@ -437,7 +497,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
               type: MaterialType.transparency,
               child: Center(
                 child: Text(
-                  data.data.toString(),
+                  data.cellType.getSize().toString(),
                 ),
               ),
             ),
@@ -475,7 +535,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
                 height: CELL_SIZE,
                 child: Center(
                   child: Text(
-                    total[x][y].data.toString(),
+                    total[x][y].unitsAround.toString(),
                   ),
                 ),
               );
@@ -499,7 +559,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
             },
             onWillAccept: (data) {
               logD("onWillAccept: $data");
-              return data.data > 0;
+              return data.cellType.getSize() > 0;
             },
             onAcceptWithDetails: (details) {
               logD("onAcceptWithDetails: ${details.toString()}");
@@ -514,23 +574,61 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   }
 }
 
+enum CellType {
+  EMPTY,
+  FILL_1,
+  FILL_2,
+  FILL_3,
+  FILL_4,
+  FILL_M,
+}
+
+extension CellTypeExtension on CellType {
+  int getSize() {
+    var size = 0;
+    switch (this) {
+      case CellType.EMPTY:
+        size = 0;
+        break;
+      case CellType.FILL_1:
+        size = 1;
+        break;
+      case CellType.FILL_2:
+        size = 2;
+        break;
+      case CellType.FILL_3:
+        size = 3;
+        break;
+      case CellType.FILL_4:
+        size = 4;
+        break;
+      case CellType.FILL_M:
+        size = 1;
+        break;
+    }
+    return size;
+  }
+}
+
 class Cell {
   int x;
   int y;
-  int data;
+  int unitsAround;
   int id;
   Axis direction;
   int anchor;
   int subId;
+  CellType cellType;
 
   Cell({
     this.x = -1,
     this.y = -1,
-    this.data = 0,
+    this.unitsAround = 0,
     this.id = -1,
     this.direction,
     this.anchor = 0,
     this.subId = 0,
+    this.cellType = CellType.EMPTY,
   });
 
   switchDirection() {
@@ -542,25 +640,27 @@ class Cell {
   Cell copyWith({
     int x,
     int y,
-    int data,
+    int unitsAround,
     int id,
     int direction,
     int anchor,
     int subId,
+    int cellType,
   }) {
     return Cell(
       x: x ?? this.x,
       y: y ?? this.y,
-      data: data ?? this.data,
+      unitsAround: unitsAround ?? this.unitsAround,
       id: id ?? this.id,
       direction: direction ?? this.direction,
       anchor: anchor ?? this.anchor,
       subId: subId ?? this.subId,
+      cellType: cellType ?? this.cellType,
     );
   }
 
   @override
   String toString() {
-    return 'Cell{x: $x, y: $y, data: $data, id: $id, direction: $direction, anchor: $anchor, subId: $subId}';
+    return 'Cell{cellType: $cellType, x: $x, y: $y, data: $unitsAround, id: $id, direction: $direction, anchor: $anchor, subId: $subId}';
   }
 }

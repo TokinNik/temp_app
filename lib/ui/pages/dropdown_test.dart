@@ -16,7 +16,7 @@ class DropdownTestPage extends BasePage {
   }
 }
 
-class _DropdownTestPageState extends BaseState<DropdownTestPage> {
+class _DropdownTestPageState extends State<BaseStatefulWidget> {
   var items = [
     1,
     2,
@@ -41,12 +41,6 @@ class _DropdownTestPageState extends BaseState<DropdownTestPage> {
   ];
   var currentValues = [1];
   var currentValue = 1;
-
-  @override
-  void blocListener(DropdownTestPage state) {}
-
-  @override
-  void init() {}
 
   @override
   Widget build(BuildContext context) {

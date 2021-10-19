@@ -8,6 +8,7 @@ import 'package:temp_app/ui/base/base_page.dart';
 import 'package:temp_app/ui/pages/temp_next_rout_page.dart';
 import 'package:temp_app/utils/extensions.dart';
 
+import 'draggable_test.dart';
 import 'dropdown_test.dart';
 
 class TempLoginPage extends BasePage {
@@ -34,7 +35,7 @@ class _TempLoginPageState extends State<BaseStatefulWidget> {
               onPressed: () {
                 globalBloc(context).add(LogOutEvent());
               },
-              child: Text(s.log_in),
+              child: Text(s.log_out),
             ),
             SizedBox(height: 24),
             TextButton(
@@ -56,11 +57,19 @@ class _TempLoginPageState extends State<BaseStatefulWidget> {
               },
               child: Text(s.change_locale),
             ),
+            SizedBox(height: 24),
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(DropdownTestPage.route());
               },
               child: Text("Dropdown test"),
+            ),
+            SizedBox(height: 24),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(DraggableTestPage.route());
+              },
+              child: Text("Draggable test"),
             ),
           ],
         ),

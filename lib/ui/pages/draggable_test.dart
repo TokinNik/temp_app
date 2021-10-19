@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:temp_app/ui/base/base_page.dart';
+import 'package:temp_app/utils/extensions.dart';
 import 'package:temp_app/utils/logger.dart';
 
 class DraggableTestPage extends BasePage {
@@ -22,7 +23,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
   var counter = 0;
   var isDragStarted = false;
   var isMoveStarted = false;
-  var dragStartedId = -2;
+  var dragStartedId = -2; //todo in const?
 
   bool _setData(
     int x,
@@ -93,10 +94,43 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     _setDataBottom(x - anchor, y, value);
   }
 
+  _setDataAround(int x, int y) {
+    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1]; //todo in const
+    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
+    listX.forEachIndexed((px, i) {
+      var posX = x + px;
+      var posY = y + listY[i];
+      var isPositionInBounds =
+          posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
+      if (isPositionInBounds && total[posX][posY].id < 0) {
+        total[posX][posY].data++;
+      }
+    });
+  }
+
+  _removeDataAround(int x, int y) {
+    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
+    listX.forEachIndexed((px, i) {
+      var posX = x + px;
+      var posY = y + listY[i];
+      var isPositionInBounds =
+          posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
+      if (isPositionInBounds) {
+        var isCallAvailable =
+            total[posX][posY].id < 0 && total[posX][posY].data > 0;
+        if (isCallAvailable) {
+          total[posX][posY].data--;
+        }
+      }
+    });
+  }
+
   _setDataRight(int x, int y, Cell value) {
     for (var i = 0; i < value.data; i++) {
       var posY = y + i;
       if (posY < maxY) {
+        _setDataAround(x, posY);
         total[x][posY] = value.copyWith(x: x, y: posY, id: counter, subId: i);
       }
     }
@@ -106,6 +140,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     for (var i = 0; i < value.data; i++) {
       var posY = y - i;
       if (posY >= 0) {
+        _setDataAround(x, posY);
         total[x][posY] = value.copyWith(x: x, y: posY, id: counter, subId: i);
       }
     }
@@ -115,6 +150,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     for (var i = 0; i < value.data; i++) {
       var posX = x - i;
       if (posX >= 0) {
+        _setDataAround(posX, y);
         total[posX][y] = value.copyWith(x: posX, y: y, id: counter, subId: i);
       }
     }
@@ -124,41 +160,65 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
     for (var i = 0; i < value.data; i++) {
       var posX = x + i;
       if (posX < maxX) {
+        _setDataAround(posX, y);
         total[posX][y] = value.copyWith(x: posX, y: y, id: counter, subId: i);
       }
     }
   }
 
-  bool _checkAllEmptyRight(int x, int y, int lenght) {
-    if (y + lenght > maxY) {
+  bool _checkAllEmptyAround(int x, int y, int id) {
+    var listX = [-1, -1, -1, 0, 0, 0, 1, 1, 1];
+    var listY = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
+    var result = true;
+    listX.forEachIndexed((px, i) {
+      var posX = x + px;
+      var posY = y + listY[i];
+      var isPositionInBounds =
+          posX < maxX && posY < maxY && posX >= 0 && posY >= 0;
+      if (isPositionInBounds) {
+        var isClearCell =
+            total[posX][posY].id < 0 || total[posX][posY].id == id;
+        logD("isClearCell $isClearCell $posX $posY  ${total[posX][posY].id}");
+        if (!isClearCell) {
+          result = false;
+        }
+      }
+    });
+    return result;
+  }
+
+  bool _checkAllEmptyRight(int x, int y, int length) {
+    if (y + length > maxY) {
       return false;
     }
-    for (var i = y; i < y + lenght; i++) {
+    for (var i = y; i < y + length; i++) {
       if (total[x][i].id >= 0) {
+        return false;
+      } else if (!_checkAllEmptyAround(x, i, total[x][i].id)) {
         return false;
       }
     }
     return true;
   }
 
-  bool _checkAllEmptyLeft(int x, int y, int lenght) {
-    if (y - lenght + 1 < 0) {
+  bool _checkAllEmptyLeft(int x, int y, int length) {
+    if (y - length + 1 < 0) {
       return false;
     }
-    for (var i = y; i > y - lenght; i--) {
-      if (total[x][i].id >= 0) {
+    for (var i = y; i > y - length; i--) {
+      if (total[x][i].id >= 0 || !_checkAllEmptyAround(x, i, total[x][i].id)) {
         return false;
       }
     }
     return true;
   }
 
-  bool _checkAllEmptyTop(int x, int y, int lenght) {
-    if (x - lenght + 1 < 0) {
+  bool _checkAllEmptyTop(int x, int y, int length) {
+    if (x - length + 1 < 0) {
       return false;
     }
-    for (var i = x; i > x - lenght; i--) {
-      if (total[i][y].id >= 0) {
+    for (var i = x; i > x - length; i--) {
+      if (total[i][y].id >= 0 || !_checkAllEmptyAround(i, y, total[i][y].id)) {
         return false;
       }
     }
@@ -170,7 +230,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
       return false;
     }
     for (var i = x; i < x + lenght; i++) {
-      if (total[i][y].id >= 0) {
+      if (total[i][y].id >= 0 || !_checkAllEmptyAround(i, y, total[i][y].id)) {
         return false;
       }
     }
@@ -183,6 +243,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
         total.forEach((row) {
           row.forEach((cell) {
             if (cell.id == value.id) {
+              _removeDataAround(cell.x, cell.y);
               total[cell.x][cell.y] = Cell();
             }
           });
@@ -427,9 +488,10 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
               if (isMoveStarted) {
                 _removeData(data);
               }
-              if (!_setData(x, y, data)) {
+              var dataSetupSuccess = _setData(x, y, data);
+              if (!dataSetupSuccess) {
                 data.switchDirection();
-                _setData(x, y, data);
+                dataSetupSuccess = _setData(x, y, data);
               }
             },
             onLeave: (data) {
@@ -446,7 +508,7 @@ class _DraggableTestPageState extends State<BaseStatefulWidget> {
               logD("onAcceptWithDetails: ${details.toString()}");
             },
           ),
-          (total[x][y].data > 0)
+          (total[x][y].id > 0)
               ? _buildDraggableBox(total[x][y])
               : SizedBox.shrink(),
         ],

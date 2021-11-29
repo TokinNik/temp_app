@@ -25,12 +25,6 @@ abstract class Environment {
     // Adding smoothness for gradients
     Paint.enableDithering = true;
 
-    // ignore: unawaited_futures
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
     // await Firebase.initializeApp();//todo add firebase Crashlytics or delete
     //
     // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

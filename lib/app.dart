@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:temp_app/bloc/global/global_bloc.dart';
-import 'package:temp_app/ui/pages/temp_login_page.dart';
-import 'package:temp_app/ui/pages/temp_logout_page.dart';
+import 'package:temp_app/ui/pages/temp_login_page/temp_login_page.dart';
+import 'package:temp_app/ui/pages/temp_logout_page/temp_logout_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'generated/l10n.dart';
+import 'localization/generated/l10n.dart';
 
 GlobalBloc globalBloc(context) => BlocProvider.of<GlobalBloc>(context);
 
@@ -15,7 +15,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  GlobalBloc _globalBloc;
+  late GlobalBloc _globalBloc;
 
   @override
   void initState() {
@@ -56,13 +56,8 @@ class _AppState extends State<App> {
     switch (state.appState) {
       case AppState.LOG_IN:
         return TempLoginPage();
-        break;
       case AppState.LOG_OUT:
         return TempLogoutPage();
-        break;
     }
-    return Center(
-      child: Text("Unknown app state"),
-    );
   }
 }

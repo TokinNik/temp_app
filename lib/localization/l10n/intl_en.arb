@@ -1,0 +1,16 @@
+{
+  "_locale": "en",
+  "api_error_no_server_response": "Сервер не отвечает. Попробуйте ещё раз.",
+  "api_error_server": "Ошибка сервера (код: {httpCode})",
+  "api_error_generic_client": "Не удалось получить детали ошибки (код: {httpCode})",
+  "api_error_no_server_connection": "Нет соединения с сервером. Проверьте соединение с попробуйте ещё раз.",
+  "api_error_unknown": "Ошибка сети (код: {httpCode})",
+  "wrong_email_or_password": "Неверный email или пароль",
+  "log_out": "LogOut",
+  "log_in": "LogIn",
+  "next_page": "NextPage",
+  "temp_next_rout_page":"Temp Next Rout Page {num}",
+  "number": "{count, plural, one{one} two{two} few{{count} page} many{{count}mm} other{{count} ???}}",
+  "change_locale" : "Change locale"
+
+}

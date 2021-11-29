@@ -19,16 +19,14 @@ extension IterableExtension<T> on Iterable<T> {
     return map((e) => f(e, i++));
   }
 
-  T firstWhereOrNull(bool Function(T e) f) {
+  T? firstWhereOrNull(bool Function(T e) f) {
     return this.firstWhere(
           (el) => f(el),
-      orElse: () => null,
+      orElse: () => null as T,
     );
   }
 
-  get tryLength => (this?.length ?? 0);
-
-  get tryFirst => ((this?.length ?? 0) > 0 ? this?.first : null);
+  get tryFirst => ((this.length) > 0 ? this.first : null);
 }
 
 extension StringExtension on String {
@@ -37,6 +35,4 @@ extension StringExtension on String {
 
   String capitalizeAll() =>
       this.split(" ").map((e) => e.capitalize()).join(" ");
-
-  bool isNullOrEmpty() => (this == null || this.isEmpty);
 }

@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 class LoggerInstance {
   static final LoggerInstance _loggerInstance = LoggerInstance._internal();
 
-  Logger logger;
+  late Logger logger;
 
   factory LoggerInstance() => _loggerInstance;
 
@@ -35,11 +35,11 @@ logV(Object message) {
   LoggerInstance().logger.v(message);
 }
 
-logW(Object message, {Object e, StackTrace stackTrace}) {
+logW(Object message, {Object? e, StackTrace? stackTrace}) {
   LoggerInstance().logger.w(message, e, stackTrace);
 }
 
-logE(Object message, {Object e, StackTrace stackTrace}) {
+logE(Object message, {Object? e, StackTrace? stackTrace}) {
   LoggerInstance().logger.e(message, e, stackTrace);
 }
 
@@ -47,6 +47,6 @@ logI(Object message) {
   LoggerInstance().logger.i(message);
 }
 
-logWTF(Object message, {Object e, StackTrace stackTrace}) {
+logWTF(Object message, {Object? e, StackTrace? stackTrace}) {
   LoggerInstance().logger.wtf(message, e, stackTrace);
 }

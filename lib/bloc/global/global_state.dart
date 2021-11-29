@@ -8,7 +8,7 @@ class GlobalState {
   });
 
   GlobalState copyWith({
-    AppState appState,
+    AppState? appState,
   }) {
     return new GlobalState(
       appState: appState ?? this.appState,

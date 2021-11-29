@@ -1,13 +1,9 @@
-import 'package:temp_app/core/dio/errors/dio_errors.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class BasicState {
-  bool isLoading;
-  bool isSuccessful;
-  Exception error;
+abstract class BasicState extends Equatable {
+  @override
+  List<Object?> get props => [hashCode];
 
-  BasicState copyWith({
-    bool isSuccessful,
-    bool isLoading,
-    ApiErrorException error,
-  });
+  @override
+  String toString() => '$runtimeType($props)';
 }

@@ -10,7 +10,7 @@ class LoggingBlocObserver implements BlocObserver {
   }
 
   @override
-  void onEvent(Bloc bloc, Object event) {
+  void onEvent(Bloc bloc, Object? event) {
     logI('[${bloc.runtimeType}] ${event.toString()}');
   }
 

@@ -4,6 +4,7 @@ import 'package:temp_app/constants/environment.dart';
 import 'package:temp_app/core/network/interceptors/auth_inteceptor.dart';
 import 'package:temp_app/core/network/interceptors/data_interceptor.dart';
 import 'package:temp_app/data/auth/auth_holder.dart';
+import 'package:temp_app/domain/session/clear_session_usecase.dart';
 
 export 'package:dio/dio.dart' show Dio;
 
@@ -53,5 +54,21 @@ class DioFactory {
     dio.interceptors.add(DataInterceptor());
 
     return dio;
+  }
+
+  static Dio buildClientByState({
+    required AuthHolder authHolder,
+    required ClearSessionUseCase clearSessionUseCase,
+  }) {
+    // var state = AppStateHolder.lastState;//todo
+    // switch (state) {
+    //   case AppState.LOG_IN:
+    //     return buildClient();
+    //   case AppState.AUTHORIZED:
+    //     return buildAuthorizedClient(authHolder, clearSessionUseCase);
+    //   case AppState.LOG_OUT:
+    //     return buildClient();
+    //   case AppState.CHECK_STATE:
+    return buildClient();
   }
 }

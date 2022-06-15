@@ -6,14 +6,16 @@ import 'package:temp_app/di/dependencies.dart';
 import 'package:temp_app/utils/logger.dart';
 
 abstract class Environment {
-  static const bool _isProd = false;
+  static const bool isProd = false;
 
   //TODO: Your api endpoint
-  static const String baseUrl =
-      _isProd ? 'https://prod.ru/' : 'https://test.ru/';
-  static const bool isBlocLoggingEnabled = !_isProd;
-  static const bool isApiLoggingEnabled = !_isProd;
-  static const bool isHttpLoggingEnabled = !_isProd;
+  static const String baseUrl = isProd
+      ? 'https://publishers.propellerads.com/'
+      : 'https://pub-preprod03.propellerads.com/';
+
+  static const bool isBlocLoggingEnabled = !isProd;
+  static const bool isApiLoggingEnabled = !isProd;
+  static const bool isHttpLoggingEnabled = !isProd;
 
   static Future<void> init() async {
     initDependencies();

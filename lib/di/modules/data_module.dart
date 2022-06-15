@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:temp_app/core/network/dio_utils/dio_factory.dart';
+import 'package:temp_app/data/auth/auth_repository.dart';
 import 'package:temp_app/data/login/login_repository.dart';
 import 'package:temp_app/data/login/service/login_service.dart';
 import 'package:temp_app/data/token/service/token_service.dart';
@@ -63,5 +64,12 @@ void _registerUser(GetIt container) {
   );
   container.registerFactory<UserStorage>(
     () => UserStorage(),
+  );
+  container.registerFactory<AuthRepository>(
+    () => AuthRepositoryImpl(
+      container.get(),
+      container.get(),
+      container.get(),
+    ),
   );
 }

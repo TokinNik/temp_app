@@ -23,8 +23,11 @@ class TempNextRoutPage extends StatefulWidget {
   State<StatefulWidget> createState() => _TempNextRoutPageState();
 }
 
-class _TempNextRoutPageState extends State<TempNextRoutPage> {
+class _TempNextRoutPageState extends State<TempNextRoutPage> with AutomaticKeepAliveClientMixin{
   _TempNextRoutPageState();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +44,9 @@ class _TempNextRoutPageState extends State<TempNextRoutPage> {
               children: <Widget>[
                 TextButton(
                   onPressed: () {
-                    _globalBloc(context).add(LogOutEvent());
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // _globalBloc(context).add(LogOutEvent());
+                    // Navigator.of(context).popUntil((route) => route.isFirst);
+                    _globalBloc(context).state.navigationRoot.getCurrentRouter().backToHome();
                   },
                   child: Text(s.log_out),
                 ),

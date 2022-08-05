@@ -8,6 +8,7 @@ import 'package:temp_app/data/auth/auth_holder.dart';
 
 import '../core/network/exceptions.dart';
 import '../domain/session/clear_session_usecase.dart';
+import 'pair.dart';
 
 enum NetworkRequestType { GET, POST, PUT, PATCH, DELETE }
 
@@ -46,21 +47,43 @@ class IsolateResponse<T> {
 
 class _PreparedNetworkRequest<Model> {
   const _PreparedNetworkRequest(
-      this.request,
-      this.parser,
-      this.dio,
-      this.headers,
-      );
+    this.request,
+    this.parser,
+    this.dio,
+    this.headers,
+    this.onSendProgress,
+    this.onReceiveProgress,
+  );
 
   final NetworkRequest request;
   final Model Function(Map<String, dynamic>)? parser;
   final Dio dio;
   final Map<String, dynamic> headers;
+  final ProgressCallback? onSendProgress;
+  final ProgressCallback? onReceiveProgress;
+
+  _PreparedNetworkRequest copyWith({
+    NetworkRequest? request,
+    Model Function(Map<String, dynamic>)? parser,
+    Dio? dio,
+    Map<String, dynamic>? headers,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) {
+    return _PreparedNetworkRequest<Model>(
+      request ?? this.request,
+      parser ?? this.parser,
+      dio ?? this.dio,
+      headers ?? this.headers,
+      onSendProgress ?? this.onSendProgress,
+      onReceiveProgress ?? this.onReceiveProgress,
+    );
+  }
 }
 
 Future<IsolateResponse<Model>> executeRequest<Model>(
-    _PreparedNetworkRequest request,
-    ) async {
+  _PreparedNetworkRequest request,
+) async {
   try {
     var response = await _dioCall(request);
     return IsolateResponse(
@@ -105,15 +128,17 @@ Future<dynamic> _dioCall(_PreparedNetworkRequest request) async {
         extra: _extra,
       )
           .compose(
-        request.dio.options,
-        request.request.path,
-        queryParameters: queryParameters,
-        data: _data,
-        options: Options(
-          method: request.request.type.name,
-          headers: request.headers,
-        ),
-      )
+            request.dio.options,
+            request.request.path,
+            queryParameters: queryParameters,
+            data: _data,
+            options: Options(
+              method: request.request.type.name,
+              headers: request.headers,
+            ),
+            onSendProgress: request.onSendProgress,
+            onReceiveProgress: request.onReceiveProgress,
+          )
           .copyWith(baseUrl: request.dio.options.baseUrl),
     ),
   );
@@ -127,7 +152,9 @@ class NetworkService {
     this.clearSessionUseCase,
     this.dio,
     httpHeaders,
-  }) : this._headers = httpHeaders ?? {};
+  })  : assert(
+            (authHolder != null && clearSessionUseCase != null) || dio != null),
+        this._headers = httpHeaders ?? {};
   Dio? dio;
   final AuthHolder? authHolder;
   final ClearSessionUseCase? clearSessionUseCase;
@@ -137,23 +164,29 @@ class NetworkService {
     _headers['Authorization'] = 'Bearer $accessToken';
   }
 
+  Dio get defaultDio {
+    return DioFactory.buildClientByState(
+      authHolder: authHolder!,
+      clearSessionUseCase: clearSessionUseCase!,
+    );
+  }
+
   Future<IsolateResponse<Model>> execute<Model>(
-      NetworkRequest request, {
-        Model Function(Map<String, dynamic>)? parser,
-        ProgressCallback? onSendProgress,
-        ProgressCallback? onReceiveProgress,
-      }) async {
+    NetworkRequest request, {
+    Model Function(Map<String, dynamic>)? parser,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
     if (dio == null) {
-      dio = DioFactory.buildClientByState(
-        authHolder: authHolder!,
-        clearSessionUseCase: clearSessionUseCase!,
-      );
+      dio = defaultDio;
     }
     final req = _PreparedNetworkRequest<Model>(
       request,
       parser,
       dio!,
       {..._headers, ...(request.headers ?? {}), ...dio!.options.headers},
+      onSendProgress,
+      onReceiveProgress,
     );
     final result = await compute(
       executeRequest<Model>,
@@ -163,26 +196,25 @@ class NetworkService {
   }
 
   Future<IsolateResponse<Model>> executeWithCancel<Model>(
-      NetworkRequest request, {
-        Model Function(Map<String, dynamic>)? parser,
-        ProgressCallback? onSendProgress,
-        ProgressCallback? onReceiveProgress,
-        CancelToken? cancelToken,
-      }) async {
+    NetworkRequest request, {
+    Model Function(Map<String, dynamic>)? parser,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
     if (dio == null) {
-      dio = DioFactory.buildClientByState(
-        authHolder: authHolder!,
-        clearSessionUseCase: clearSessionUseCase!,
-      );
+      dio = defaultDio;
     }
     final networkRequest = _PreparedNetworkRequest<Model>(
       request,
       parser,
       dio!,
       {..._headers, ...(request.headers ?? {}), ...dio!.options.headers},
+      onSendProgress,
+      onReceiveProgress,
     );
     Completer<IsolateResponse<Model>> completeResult =
-    Completer<IsolateResponse<Model>>();
+        Completer<IsolateResponse<Model>>();
 
     ReceivePort receivePort = ReceivePort();
     SendPort? sendPort;
@@ -191,24 +223,36 @@ class NetworkService {
       executeRequestWithCancel<Model>,
       IsolateConfiguration<_PreparedNetworkRequest<Model>,
           IsolateResponse<Model>>(
-        executeRequest<Model>,
-        networkRequest,
-        receivePort.sendPort,
+        callback: executeRequest<Model>,
+        message: networkRequest,
+        resultPort: receivePort.sendPort,
       ),
     );
 
-    receivePort.listen((result) {
-      if (result is SendPort) {
-        sendPort = result;
-      } else {
-        if (!completeResult.isCompleted) {
-          completeResult.complete(result as IsolateResponse<Model>);
+    receivePort.listen(
+      (result) {
+        if (result is SendPort) {
+          sendPort = result;
+        } else if (result is Triple<_IsolateMessage, int, int>) {
+          if (result.first == _IsolateMessage.ON_SEND_PROGRESS &&
+              onSendProgress != null) {
+            onSendProgress.call(result.second, result.third);
+          }
+          if (result.first == _IsolateMessage.ON_RECEIVE_PROGRESS &&
+              onReceiveProgress != null) {
+            onReceiveProgress.call(result.second, result.third);
+          }
+        } else if (result is IsolateResponse<Model> &&
+            !completeResult.isCompleted) {
+          completeResult.complete(result);
+        } else {
+          //todo
         }
-      }
-    });
+      },
+    );
 
     cancelToken?.whenCancel.then((value) {
-      sendPort?.send("cancel");
+      sendPort?.send(_IsolateMessage.CANCEL);
     });
 
     await completeResult.future;
@@ -220,42 +264,93 @@ class NetworkService {
   }
 
   Future<IsolateResponse<R>> executeRequestWithCancel<R>(
-      IsolateConfiguration list) async {
+      IsolateConfiguration message) async {
     ReceivePort rp = ReceivePort();
+    IsolateConfiguration config = message;
 
-    list.resultPort.send(rp.sendPort);
+    config.resultPort.send(rp.sendPort);
 
-    rp.listen((message) {
-      if (message == "cancel") {
-        Isolate.exit(
-          list.resultPort,
-          IsolateResponse<R>(
-            isSuccess: false,
-            error: RequestCancelledException(),
-          ),
-        );
-      }
-    });
+    rp.listen(
+      (message) {
+        if (message == _IsolateMessage.CANCEL) {
+          Isolate.exit(
+            config.resultPort,
+            IsolateResponse<R>(
+              isSuccess: false,
+              error: RequestCancelledException(),
+            ),
+          );
+        }
+      },
+    );
 
-    final FutureOr<IsolateResponse<R>> result = await list.apply();
+    if (config.message is _PreparedNetworkRequest) {
+      config = config.copyWith(
+        message: (config.message as _PreparedNetworkRequest).copyWith(
+          onReceiveProgress:
+              (config.message as _PreparedNetworkRequest).onReceiveProgress ==
+                      null
+                  ? null
+                  : (c, t) {
+                      config.resultPort.send(
+                        Triple(
+                          _IsolateMessage.ON_RECEIVE_PROGRESS,
+                          c,
+                          t,
+                        ),
+                      );
+                    },
+          onSendProgress:
+              (config.message as _PreparedNetworkRequest).onSendProgress == null
+                  ? null
+                  : (c, t) {
+                      config.resultPort.send(
+                        Triple(
+                          _IsolateMessage.ON_SEND_PROGRESS,
+                          c,
+                          t,
+                        ),
+                      );
+                    },
+        ),
+      );
+    }
 
-    Isolate.exit(list.resultPort, result);
+    final FutureOr<IsolateResponse<R>> result = await config.apply();
+
+    Isolate.exit(config.resultPort, result);
   }
+}
+
+enum _IsolateMessage {
+  CANCEL,
+  ON_RECEIVE_PROGRESS,
+  ON_SEND_PROGRESS,
 }
 
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 @immutable
 class IsolateConfiguration<Q, R> {
-  const IsolateConfiguration(
-      this.callback,
-      this.message,
-      this.resultPort,
-      );
+  const IsolateConfiguration({
+    required this.callback,
+    required this.message,
+    required this.resultPort,
+  });
 
   final ComputeCallback<Q, R> callback;
   final Q message;
   final SendPort resultPort;
 
   FutureOr<R> apply() => callback(message);
+
+  IsolateConfiguration copyWith({
+    Q? message,
+  }) {
+    return IsolateConfiguration<Q, R>(
+      callback: this.callback,
+      message: message ?? this.message,
+      resultPort: this.resultPort,
+    );
+  }
 }
